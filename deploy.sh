@@ -170,14 +170,39 @@ add_link_conditionals
 echo "[4/7] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
-# Step 5: Copy docker-compose.override.yml
+# Step 5: Generate docker-compose.override.yml with absolute paths
 echo "[5/7] Setting up Docker Compose override..."
-if [ -f "$SCRIPT_DIR/docker-compose.override.yml" ]; then
-    cp "$SCRIPT_DIR/docker-compose.override.yml" "$OPNFORM_DIR/docker-compose.override.yml"
-    echo "✓ docker-compose.override.yml copied"
-else
-    echo "⚠ Warning: docker-compose.override.yml not found"
-fi
+cat > "$OPNFORM_DIR/docker-compose.override.yml" <<EOF
+---
+# Docker Compose Override for Custom Build (Auto-generated)
+# This file modifies the default docker-compose.yml to build images locally
+
+services:
+  api:
+    build:
+      context: $OPNFORM_DIR
+      dockerfile: docker/Dockerfile.api
+    image: opnform-api-custom:latest
+
+  api-worker:
+    build:
+      context: $OPNFORM_DIR
+      dockerfile: docker/Dockerfile.api
+    image: opnform-api-custom:latest
+
+  api-scheduler:
+    build:
+      context: $OPNFORM_DIR
+      dockerfile: docker/Dockerfile.api
+    image: opnform-api-custom:latest
+
+  ui:
+    build:
+      context: $OPNFORM_DIR
+      dockerfile: docker/Dockerfile.client
+    image: opnform-client-custom:latest
+EOF
+echo "✓ docker-compose.override.yml generated with absolute paths"
 
 # Step 6: Stop existing containers
 echo "[6/7] Stopping existing containers..."
