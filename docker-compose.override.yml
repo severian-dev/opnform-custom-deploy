@@ -1,0 +1,32 @@
+---
+# Docker Compose Override for Custom Build
+# This file modifies the default docker-compose.yml to build images locally
+# instead of pulling prebuilt images from Docker Hub
+
+services:
+  api:
+    # Build from local Dockerfile instead of using prebuilt image
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    # Comment out the prebuilt image
+    image: opnform-api-custom:latest
+
+  api-worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    image: opnform-api-custom:latest
+
+  api-scheduler:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    image: opnform-api-custom:latest
+
+  ui:
+    # Build from local Dockerfile instead of using prebuilt image
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.client
+    image: opnform-client-custom:latest
