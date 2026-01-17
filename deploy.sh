@@ -170,39 +170,30 @@ add_link_conditionals
 echo "[4/7] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
-# Step 5: Generate docker-compose.override.yml with absolute paths
-echo "[5/7] Setting up Docker Compose override..."
-cat > "$OPNFORM_DIR/docker-compose.override.yml" <<EOF
----
-# Docker Compose Override for Custom Build (Auto-generated)
-# This file modifies the default docker-compose.yml to build images locally
+# Step 5: Backup and modify docker-compose.yml for local builds
+echo "[5/7] Modifying docker-compose.yml for local builds..."
 
-services:
-  api:
-    build:
-      context: $OPNFORM_DIR
-      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
-    image: opnform-api-custom:latest
+# Backup original if not already backed up
+if [ ! -f "$OPNFORM_DIR/docker-compose.yml.original" ]; then
+    cp "$OPNFORM_DIR/docker-compose.yml" "$OPNFORM_DIR/docker-compose.yml.original"
+    echo "✓ Original docker-compose.yml backed up"
+fi
 
-  api-worker:
-    build:
-      context: $OPNFORM_DIR
-      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
-    image: opnform-api-custom:latest
+# Restore from backup to start fresh
+cp "$OPNFORM_DIR/docker-compose.yml.original" "$OPNFORM_DIR/docker-compose.yml"
 
-  api-scheduler:
-    build:
-      context: $OPNFORM_DIR
-      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
-    image: opnform-api-custom:latest
+# Modify the docker-compose.yml to add build directives
+# Replace image: jhumanj/opnform-api:latest with build config
+sed -i '/api: &api-environment/,/image: jhumanj\/opnform-api:latest/{
+    s|image: jhumanj/opnform-api:latest|build:\n      context: '"$OPNFORM_DIR"'\n      dockerfile: '"$OPNFORM_DIR"'/docker/Dockerfile.api\n    image: opnform-api-custom:latest|
+}' "$OPNFORM_DIR/docker-compose.yml"
 
-  ui:
-    build:
-      context: $OPNFORM_DIR
-      dockerfile: $OPNFORM_DIR/docker/Dockerfile.client
-    image: opnform-client-custom:latest
-EOF
-echo "✓ docker-compose.override.yml generated with absolute paths"
+# Replace image: jhumanj/opnform-client:latest with build config
+sed -i '/ui:/,/image: jhumanj\/opnform-client:latest/{
+    s|image: jhumanj/opnform-client:latest|build:\n      context: '"$OPNFORM_DIR"'\n      dockerfile: '"$OPNFORM_DIR"'/docker/Dockerfile.client\n    image: opnform-client-custom:latest|
+}' "$OPNFORM_DIR/docker-compose.yml"
+
+echo "✓ docker-compose.yml modified for local builds"
 
 # Step 6: Stop existing containers
 echo "[6/7] Stopping existing containers..."
