@@ -170,25 +170,25 @@ add_link_conditionals
 echo "[4/7] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
-# Step 5: Copy docker-compose.override.yml
+# Step 5: Copy docker compose.override.yml
 echo "[5/7] Setting up Docker Compose override..."
-if [ -f "$SCRIPT_DIR/docker-compose.override.yml" ]; then
-    cp "$SCRIPT_DIR/docker-compose.override.yml" "$OPNFORM_DIR/docker-compose.override.yml"
-    echo "✓ docker-compose.override.yml copied"
+if [ -f "$SCRIPT_DIR/docker compose.override.yml" ]; then
+    cp "$SCRIPT_DIR/docker compose.override.yml" "$OPNFORM_DIR/docker compose.override.yml"
+    echo "✓ docker compose.override.yml copied"
 else
-    echo "⚠ Warning: docker-compose.override.yml not found"
+    echo "⚠ Warning: docker compose.override.yml not found"
 fi
 
 # Step 6: Stop existing containers
 echo "[6/7] Stopping existing containers..."
 cd "$OPNFORM_DIR"
-docker-compose down || true
+docker compose down || true
 
 # Step 7: Rebuild and start containers
 echo "[7/7] Building custom images and starting containers..."
 echo "This may take several minutes..."
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 
 echo ""
 echo "=================================="
@@ -201,6 +201,6 @@ else
     echo "Your customized OpnForm is now running."
 fi
 echo ""
-echo "Check status with: docker-compose ps"
-echo "View logs with: docker-compose logs -f"
+echo "Check status with: docker compose ps"
+echo "View logs with: docker compose logs -f"
 echo ""
