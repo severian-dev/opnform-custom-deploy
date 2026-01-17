@@ -182,10 +182,15 @@ fi
 # Step 6: Stop existing containers
 echo "[6/7] Stopping existing containers..."
 cd "$OPNFORM_DIR"
+echo "Current directory: $(pwd)"
+echo "Checking for docker-compose files:"
+ls -la docker-compose*.yml
+echo ""
 docker compose down || true
 
 # Step 7: Rebuild and start containers
 echo "[7/7] Building custom images and starting containers..."
+echo "Current directory: $(pwd)"
 echo "This may take several minutes..."
 docker compose build --no-cache
 docker compose up -d
