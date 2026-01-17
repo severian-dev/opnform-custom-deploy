@@ -204,11 +204,23 @@ ls -la docker-compose*.yml
 echo ""
 docker compose down || true
 
-# Step 7: Rebuild and start containers
-echo "[7/7] Building custom images and starting containers..."
+# Step 7: Build images directly with podman (bypass podman-compose)
+echo "[7/7] Building custom images..."
 echo "Current directory: $(pwd)"
 echo "This may take several minutes..."
-docker compose build --no-cache
+
+# Build API image
+echo "Building API image..."
+podman build --no-cache -t opnform-api-custom:latest -f "$OPNFORM_DIR/docker/Dockerfile.api" "$OPNFORM_DIR"
+
+# Build Client image
+echo "Building Client image..."
+podman build --no-cache -t opnform-client-custom:latest -f "$OPNFORM_DIR/docker/Dockerfile.client" "$OPNFORM_DIR"
+
+echo "✓ Images built successfully"
+
+# Start containers with docker compose
+echo "Starting containers..."
 docker compose up -d
 
 echo ""
