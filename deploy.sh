@@ -170,13 +170,13 @@ add_link_conditionals
 echo "[4/7] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
-# Step 5: Copy docker compose.override.yml
+# Step 5: Copy docker-compose.override.yml
 echo "[5/7] Setting up Docker Compose override..."
-if [ -f "$SCRIPT_DIR/docker compose.override.yml" ]; then
-    cp "$SCRIPT_DIR/docker compose.override.yml" "$OPNFORM_DIR/docker compose.override.yml"
-    echo "✓ docker compose.override.yml copied"
+if [ -f "$SCRIPT_DIR/docker-compose.override.yml" ]; then
+    cp "$SCRIPT_DIR/docker-compose.override.yml" "$OPNFORM_DIR/docker-compose.override.yml"
+    echo "✓ docker-compose.override.yml copied"
 else
-    echo "⚠ Warning: docker compose.override.yml not found"
+    echo "⚠ Warning: docker-compose.override.yml not found"
 fi
 
 # Step 6: Stop existing containers
