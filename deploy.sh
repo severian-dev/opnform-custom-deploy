@@ -181,25 +181,25 @@ services:
   api:
     build:
       context: $OPNFORM_DIR
-      dockerfile: docker/Dockerfile.api
+      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
     image: opnform-api-custom:latest
 
   api-worker:
     build:
       context: $OPNFORM_DIR
-      dockerfile: docker/Dockerfile.api
+      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
     image: opnform-api-custom:latest
 
   api-scheduler:
     build:
       context: $OPNFORM_DIR
-      dockerfile: docker/Dockerfile.api
+      dockerfile: $OPNFORM_DIR/docker/Dockerfile.api
     image: opnform-api-custom:latest
 
   ui:
     build:
       context: $OPNFORM_DIR
-      dockerfile: docker/Dockerfile.client
+      dockerfile: $OPNFORM_DIR/docker/Dockerfile.client
     image: opnform-client-custom:latest
 EOF
 echo "✓ docker-compose.override.yml generated with absolute paths"
