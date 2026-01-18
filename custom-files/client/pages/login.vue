@@ -14,7 +14,7 @@
             <!-- Logo -->
             <div class="flex justify-center mb-4">
               <img
-                src="/images/0-0111.jpeg"
+                src="/img/logo.svg"
                 alt="Avalon"
                 class="w-12 h-12 rounded-full border border-[#5a8a7a]/30"
               />

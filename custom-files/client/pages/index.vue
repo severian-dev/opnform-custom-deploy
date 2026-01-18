@@ -9,7 +9,7 @@
     <div class="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <!-- Logo -->
       <img
-        src="/images/0-0111.jpeg"
+        src="/img/logo.svg"
         alt="Avalon"
         class="w-20 h-20 rounded-full border border-[#5a8a7a]/30 mb-6"
       />
