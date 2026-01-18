@@ -31,6 +31,14 @@
             </p>
 
             <login-form class="avalon-form" />
+
+            <!-- Sign Up Link (always visible for self-hosted) -->
+            <p class="text-neutral-500 text-sm text-center mt-4">
+              Don't have an account?
+              <NuxtLink :to="{ name: 'register' }" class="font-semibold ml-1 text-[#7ab8a8] hover:text-[#9ad8c8]">
+                Sign Up
+              </NuxtLink>
+            </p>
           </div>
         </div>
 
