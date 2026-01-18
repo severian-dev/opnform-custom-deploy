@@ -16,7 +16,7 @@
 
       <!-- Title -->
       <h1
-        class="text-3xl md:text-4xl tracking-[0.1em] mb-3 text-center"
+        class="text-3xl md:text-4xl tracking-[0.1em] mb-3 text-center text-[#e8ebe4]"
         style="font-family: 'Cinzel', serif"
       >
         {{ appName.toUpperCase() }}

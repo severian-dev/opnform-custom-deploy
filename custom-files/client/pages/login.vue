@@ -21,7 +21,7 @@
             </div>
 
             <h2
-              class="text-2xl text-center mb-1"
+              class="text-2xl text-center mb-1 text-[#e8ebe4]"
               style="font-family: 'Cinzel', serif"
             >
               Login to {{ appName }}
@@ -45,7 +45,7 @@
         <!-- Left Section -->
         <div class="w-full md:w-1/2 md:p-6 mt-8 md:mt-0 text-center md:text-left">
           <h1
-            class="text-3xl md:text-4xl mb-4 tracking-[0.1em]"
+            class="text-3xl md:text-4xl mb-4 tracking-[0.1em] text-[#e8ebe4]"
             style="font-family: 'Cinzel', serif"
           >
             {{ appName.toUpperCase() }}
