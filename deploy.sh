@@ -97,7 +97,7 @@ add_link_conditionals() {
 }
 
 # Step 1: Copy custom client files
-echo "[1/7] Copying custom client files..."
+echo "[1/9] Copying custom client files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/client/public/img" "$OPNFORM_DIR/client/public/img"
 copy_custom_files "$SCRIPT_DIR/custom-files/client/pages" "$OPNFORM_DIR/client/pages"
 copy_custom_files "$SCRIPT_DIR/custom-files/client/css" "$OPNFORM_DIR/client/css"
@@ -120,7 +120,7 @@ if [ -f "$SCRIPT_DIR/custom-files/client/app.config.ts" ]; then
 fi
 
 # Step 2: Replace hardcoded app names
-echo "[2/7] Replacing hardcoded app names..."
+echo "[2/9] Replacing hardcoded app names..."
 
 # Extract app name from config
 if [ "$CONFIG_COPIED" = true ]; then
@@ -163,15 +163,15 @@ else
 fi
 
 # Step 3: Add conditional rendering for empty links
-echo "[3/7] Configuring link visibility..."
+echo "[3/9] Configuring link visibility..."
 add_link_conditionals
 
 # Step 4: Copy custom API files (if any)
-echo "[4/7] Copying custom API files..."
+echo "[4/9] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
 # Step 5: Backup and modify docker-compose.yml for local builds
-echo "[5/7] Modifying docker-compose.yml for local builds..."
+echo "[5/9] Modifying docker-compose.yml for local builds..."
 
 # Backup original if not already backed up
 if [ ! -f "$OPNFORM_DIR/docker-compose.yml.original" ]; then
@@ -196,7 +196,7 @@ sed -i '/ui:/,/image: jhumanj\/opnform-client:latest/{
 echo "✓ docker-compose.yml modified for local builds"
 
 # Step 6: Stop existing containers
-echo "[6/7] Stopping existing containers..."
+echo "[6/9] Stopping existing containers..."
 cd "$OPNFORM_DIR"
 echo "Current directory: $(pwd)"
 echo "Checking for docker-compose files:"
@@ -204,8 +204,26 @@ ls -la docker-compose*.yml
 echo ""
 docker compose down || true
 
-# Step 7: Build images directly with podman (bypass podman-compose)
-echo "[7/7] Building custom images..."
+# Step 7: Setup temporary swap for build (if needed)
+echo "[7/9] Checking available memory..."
+available_mem=$(free -m | awk '/^Mem:/{print $7}')
+echo "Available memory: ${available_mem}MB"
+
+SWAP_FILE="/tmp/opnform-build-swap"
+SWAP_CREATED=false
+
+if [ "$available_mem" -lt 8192 ]; then
+    echo "Memory is low, creating temporary 10GB swap file for build..."
+    sudo dd if=/dev/zero of="$SWAP_FILE" bs=1M count=10240 status=progress 2>/dev/null || true
+    sudo chmod 600 "$SWAP_FILE"
+    sudo mkswap "$SWAP_FILE"
+    sudo swapon "$SWAP_FILE"
+    SWAP_CREATED=true
+    echo "✓ Temporary swap enabled"
+fi
+
+# Step 8: Build images directly with podman (bypass podman-compose)
+echo "[8/9] Building custom images..."
 echo "Current directory: $(pwd)"
 echo "This may take several minutes..."
 
@@ -219,8 +237,16 @@ podman build --no-cache -t opnform-client-custom:latest -f "$OPNFORM_DIR/docker/
 
 echo "✓ Images built successfully"
 
-# Start containers with docker compose
-echo "Starting containers..."
+# Cleanup swap if we created it
+if [ "$SWAP_CREATED" = true ]; then
+    echo "Removing temporary swap file..."
+    sudo swapoff "$SWAP_FILE"
+    sudo rm -f "$SWAP_FILE"
+    echo "✓ Temporary swap removed"
+fi
+
+# Step 9: Start containers with docker compose
+echo "[9/9] Starting containers..."
 docker compose up -d
 
 echo ""
