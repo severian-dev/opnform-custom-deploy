@@ -24,13 +24,13 @@
               class="text-2xl text-center mb-1 text-[#e8ebe4]"
               style="font-family: 'Cinzel', serif"
             >
-              Login to {{ appName }}
+              Create an account
             </h2>
             <p class="text-sm text-[#9aaa9a] text-center mb-6" style="font-family: 'Cormorant Garamond', serif">
-              Welcome back. Enter your details to continue.
+              Sign up in less than 2 minutes.
             </p>
 
-            <login-form class="avalon-form" />
+            <register-form class="avalon-form" />
           </div>
         </div>
 
@@ -43,7 +43,7 @@
             {{ appName.toUpperCase() }}
           </h1>
           <p class="text-[#9aaa9a] text-lg" style="font-family: 'Cormorant Garamond', serif">
-            Form builder for Avalon creators.
+            Create beautiful forms and share them anywhere.
           </p>
         </div>
       </div>
@@ -55,7 +55,7 @@
 
 <script setup>
 import { useOpnSeoMeta } from '~/composables/useOpnSeoMeta'
-import LoginForm from "~/components/pages/auth/components/LoginForm.vue"
+import RegisterForm from "~/components/pages/auth/components/RegisterForm.vue"
 import opnformConfig from "~/opnform.config.js"
 
 definePageMeta({
@@ -66,8 +66,8 @@ definePageMeta({
 const appName = computed(() => opnformConfig.app_name || 'Avalon')
 
 useOpnSeoMeta({
-  title: `Login | ${appName.value}`,
-  description: "Sign in to Avalon Forms."
+  title: `Register | ${appName.value}`,
+  description: "Create your Avalon Forms account."
 })
 </script>
 
