@@ -27,10 +27,37 @@
               Create an account
             </h2>
             <p class="text-sm text-[#9aaa9a] text-center mb-6" style="font-family: 'Cormorant Garamond', serif">
-              Sign up in less than 2 minutes.
+              Enter the access code to continue.
             </p>
 
-            <register-form class="avalon-form" />
+            <!-- Access Code Check -->
+            <div v-if="!accessGranted" class="avalon-form">
+              <div class="mb-4">
+                <label class="block text-sm mb-2 text-[#b8c4b8]">Access Code</label>
+                <input
+                  v-model="accessCode"
+                  type="text"
+                  placeholder="Enter access code"
+                  class="w-full px-4 py-2 rounded-md"
+                  style="background: rgba(15, 25, 20, 0.6); border: 1px solid rgba(90, 138, 122, 0.25); color: #e8ebe4;"
+                  @keyup.enter="checkAccessCode"
+                />
+              </div>
+              <UButton
+                block
+                size="lg"
+                @click="checkAccessCode"
+                class="btn-avalon"
+              >
+                Continue
+              </UButton>
+              <p v-if="codeError" class="text-red-400 text-sm mt-2 text-center">
+                Invalid access code. Please try again.
+              </p>
+            </div>
+
+            <!-- Registration Form (shown after correct code) -->
+            <register-form v-else class="avalon-form" />
           </div>
         </div>
 
@@ -56,6 +83,7 @@
 <script setup>
 import { useOpnSeoMeta } from '~/composables/useOpnSeoMeta'
 import RegisterForm from "~/components/pages/auth/components/RegisterForm.vue"
+import { opnFetch } from "~/composables/useOpnApi.js"
 import opnformConfig from "~/opnform.config.js"
 
 definePageMeta({
@@ -69,6 +97,28 @@ useOpnSeoMeta({
   title: `Register | ${appName.value}`,
   description: "Create your Avalon Forms account."
 })
+
+// Access code: checked on the server (POST /registration-code), which sets the
+// short-lived ticket POST /register asks for. The code is in the server's
+// api/.env (REGISTRATION_CODE), never here.
+const accessCode = ref('')
+const accessGranted = ref(false)
+const codeError = ref(false)
+const checking = ref(false)
+
+const checkAccessCode = async () => {
+  if (checking.value) return
+  checking.value = true
+  try {
+    await opnFetch('/registration-code', { method: 'POST', body: { code: accessCode.value } })
+    accessGranted.value = true
+    codeError.value = false
+  } catch {
+    codeError.value = true
+  } finally {
+    checking.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -76,6 +126,21 @@ useOpnSeoMeta({
 
 .login-card {
   background: rgba(15, 25, 20, 0.9);
+}
+
+.btn-avalon {
+  background: rgba(20, 35, 30, 0.8) !important;
+  border: 1px solid rgba(90, 138, 122, 0.3) !important;
+  color: #e8ebe4 !important;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.btn-avalon:hover {
+  background: rgba(30, 50, 40, 0.9) !important;
+  border-color: rgba(90, 138, 122, 0.5) !important;
+  box-shadow: 0 0 20px 4px rgba(90, 138, 122, 0.2);
 }
 
 /* Form overrides */

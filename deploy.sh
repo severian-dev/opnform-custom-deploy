@@ -170,6 +170,25 @@ add_link_conditionals
 echo "[4/9] Copying custom API files..."
 copy_custom_files "$SCRIPT_DIR/custom-files/api" "$OPNFORM_DIR/api"
 
+# The registration access code is checked on the server: POST /register asks for
+# the ticket POST /registration-code sets (custom-files/api). Idempotent; stops the
+# deploy if upstream's register route changed, rather than leave registration open.
+python3 - "$OPNFORM_DIR/api/routes/api.php" <<'PY' || exit 1
+import sys
+p = sys.argv[1]
+s = open(p).read()
+old = "Route::post('register', [RegisterController::class, 'register']);"
+new = ("Route::post('register', [RegisterController::class, 'register'])"
+       "->middleware(\\App\\Http\\Middleware\\RequireRegistrationCode::class);\n"
+       "    Route::post('registration-code', [\\App\\Http\\Controllers\\RegistrationCodeController::class, 'verify'])"
+       "->middleware('throttle:5,1');")
+if "RequireRegistrationCode" not in s:
+    if s.count(old) != 1:
+        sys.exit("  ✗ upstream changed the register route: POST /register is NOT code-gated")
+    open(p, "w").write(s.replace(old, new))
+print("  ✓ POST /register needs the access code (REGISTRATION_CODE in api/.env)")
+PY
+
 # Step 5: Backup and modify docker-compose.yml for local builds
 echo "[5/9] Modifying docker-compose.yml for local builds..."
 
