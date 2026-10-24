@@ -28,34 +28,30 @@ This guide shows different ways to limit registration to friends only, without c
 
 ## Option 2: Access Code Protection (Moderate)
 
-**What it does:** Adds a simple access code to the registration page. Only people with the code can register.
+**What it does:** `/register` asks for an access code first, and the server checks it. Only people with the code can register.
 
-**Security Level:** Medium (code can be shared easily)
+**Security Level:** Medium (the code can be shared, but it is never in the page or this repo)
+
+**How it works:**
+- `custom-files/client/pages/register.vue` asks for the code and sends it to `POST /api/registration-code`.
+- `custom-files/api/app/Http/Controllers/RegistrationCodeController.php` compares it with `REGISTRATION_CODE` from the server's `api/.env` (case and surrounding spaces ignored). A right code sets a signed ticket in an HttpOnly cookie for 30 minutes (`REGISTRATION_TICKET_MINUTES`).
+- `custom-files/api/app/Http/Middleware/RequireRegistrationCode.php` makes `POST /api/register` ask for that ticket. An invite link (Option 3) and the very first account need no code.
+- `deploy.sh` adds both routes to `api/routes/api.php`; the code check is throttled to 5 tries a minute.
+- With `REGISTRATION_CODE` unset, nobody registers without an invite.
 
 **How to use:**
-1. Use the `register-with-code.vue` page instead of `register.vue`
-2. Edit the access code on line 95:
-   ```javascript
-   const VALID_CODE = 'avalon2026'  // Change this to your secret
-   ```
-3. Rename files:
-   ```bash
-   cd custom-files/client/pages
-   mv register.vue register-original.vue
-   mv register-with-code.vue register.vue
-   ```
-4. Deploy with `./deploy.sh`
-5. Share the code with friends: "Go to /register and use code: avalon2026"
+1. On the server, in `api/.env`: `REGISTRATION_CODE=your-code` (never in this repo).
+2. Deploy with `./deploy.sh` (it recreates the containers, which read `api/.env`).
+3. Share the code with friends: "Go to /register and use the code you were given."
 
 **Pros:**
-- Easy to implement
-- Code can be changed anytime
-- Friends can register themselves
+- The code is checked on the server: the API refuses a registration without it.
+- Change the code in `api/.env` any time; old tickets run out within 30 minutes.
+- Friends can register themselves.
 
 **Cons:**
-- Code is stored in client-side JavaScript (visible if someone inspects the code)
-- Once code is shared, it can spread to strangers
-- No way to revoke access for individual users
+- Once the code is shared, it can spread to strangers.
+- No way to revoke access for individual users.
 
 ---
 
@@ -181,10 +177,10 @@ Then modify the RegisterController to use this rule (requires more advanced cust
 **For most cases, use Option 1 + Option 2 combined:**
 
 1. **Hide the signup link** (Option 1) - Use custom `LoginForm.vue`
-2. **Add access code** (Option 2) - Use `register-with-code.vue`
+2. **Add access code** (Option 2) - `REGISTRATION_CODE` in the server's `api/.env`; `/register` asks for it
 3. **Share both** with friends:
    - URL: `https://your-domain.com/register`
-   - Code: `avalon2026` (or whatever you set)
+   - Code: `your-code` (or whatever you set)
 
 This gives you:
 - Two layers of obscurity (hidden link + access code)
@@ -199,22 +195,14 @@ This gives you:
 ## Quick Setup for Option 1 + 2
 
 ```bash
-cd opnform-custom-deploy/custom-files/client/pages
-
-# Rename the files
-mv register.vue register-original.vue
-mv register-with-code.vue register.vue
-
-# Edit the access code
-nano register.vue
-# Change line 95: const VALID_CODE = 'your-secret-here'
+# On the server, once: the code goes in api/.env, never in this repo
+echo 'REGISTRATION_CODE=your-code' >> ../api/.env
 
 # Deploy
-cd ../../../
 ./deploy.sh
 
 # Share with friends:
-# "Go to https://your-domain.com/register and enter code: your-secret-here"
+# "Go to https://your-domain.com/register and enter the code you were given"
 ```
 
 ---
@@ -223,11 +211,11 @@ cd ../../../
 
 If you need to change the code (e.g., if it leaks):
 
-1. Edit `custom-files/client/pages/register.vue` line 95
-2. Run `./deploy.sh` to rebuild
+1. Change `REGISTRATION_CODE` in the server's `api/.env`
+2. Run `./deploy.sh` (or `docker compose up -d api`) so the API reads it: `api/.env` is read when the container is created, so `artisan optimize` alone does not pick it up
 3. Notify friends of the new code
 
-The rebuild takes 2-5 minutes (uses cache, faster than first build).
+The code used before the server-side check was written in this file and in `register-with-code.vue`, and both are in this public repo's git history. Treat it as public: set a new, long `REGISTRATION_CODE`, never that one.
 
 ---
 
