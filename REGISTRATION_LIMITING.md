@@ -41,7 +41,7 @@ This guide shows different ways to limit registration to friends only, without c
 
 **How to use:**
 1. On the server, in `api/.env`: `REGISTRATION_CODE=your-code` (never in this repo).
-2. Deploy with `./deploy.sh` (it re-reads the config: `artisan optimize`).
+2. Deploy with `./deploy.sh` (it recreates the containers, which read `api/.env`).
 3. Share the code with friends: "Go to /register and use the code you were given."
 
 **Pros:**
@@ -212,8 +212,10 @@ echo 'REGISTRATION_CODE=your-code' >> ../api/.env
 If you need to change the code (e.g., if it leaks):
 
 1. Change `REGISTRATION_CODE` in the server's `api/.env`
-2. Run `./deploy.sh` (or `docker compose exec api php artisan optimize`) so the API reads it
+2. Run `./deploy.sh` (or `docker compose up -d api`) so the API reads it: `api/.env` is read when the container is created, so `artisan optimize` alone does not pick it up
 3. Notify friends of the new code
+
+The code used before the server-side check was written in this file and in `register-with-code.vue`, and both are in this public repo's git history. Treat it as public: set a new, long `REGISTRATION_CODE`, never that one.
 
 ---
 
